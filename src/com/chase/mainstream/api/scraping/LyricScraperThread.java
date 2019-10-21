@@ -1,4 +1,4 @@
-package com.chase.mainstream.api.extended;
+package com.chase.mainstream.api.scraping;
 
 import java.util.concurrent.Future;
 
@@ -43,8 +43,7 @@ public class LyricScraperThread extends Thread {
 
 			String lyrics = element.wholeText().trim();
 			song.lyrics = lyrics;
-
-			// System.out.println("Completed " + song.full_title);
+			System.out.println("Completed " + song.title);
 
 		} catch (Exception ex) {
 			ex.printStackTrace();

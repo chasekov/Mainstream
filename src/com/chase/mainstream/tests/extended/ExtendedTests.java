@@ -1,9 +1,11 @@
 package com.chase.mainstream.tests.extended;
 
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.FileWriter;
+import java.io.InputStreamReader;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Future;
 
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -11,62 +13,44 @@ import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 
 import com.chase.mainstream.api.ExtendedClient;
-import com.chase.mainstream.api.enums.SortType;
-import com.chase.mainstream.api.extended.LyricScraperThread;
-import com.chase.mainstream.models.inners.Song;
+import com.chase.mainstream.api.scraping.DiscographyCallable;
+import com.chase.mainstream.models.custom.Discography;
+import com.chase.mainstream.models.inners.Artist;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class ExtendedTests {
 
 	public static void main(String[] args) throws Exception {
 		ExtendedClient mainstream = new ExtendedClient(
 				"PaBGoZpaVpHDc3_-JtGQ4I3OHuIOPk-4M0OyRzHcrYxK8LHdVEr_4Qf20DPadqtk");
-
-		// Oliver tree is a hip hop artist
-		int artistId = mainstream.getArtistId("Oliver Tree");
-
-		// Get every song where Oliver tree is the primary artist
-		// No songs where oliver tree is a feature will be included
-		List<Song> songs = mainstream.getArtistSongs(artistId, SortType.POPULARITY, true);
-
 		RequestConfig requestConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build();
 		CloseableHttpAsyncClient httpclient = HttpAsyncClients.custom().setDefaultRequestConfig(requestConfig).build();
-
 		httpclient.start();
 
-		// Allow for 15 concurrent connections
-		// AKA there will be a maximum of 15 songs being scraped at the same time
-		ExecutorService pool = Executors.newFixedThreadPool(15);
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-		// Lyric scraper threads, request song html and parse for the lyrics
-		// Lyrics are then placed into song.lyrics attribute
-		// Work in progress, obviously will be modularized/abstracted. Very specific
-		// usage as of now.
-		LyricScraperThread[] threads = new LyricScraperThread[songs.size()];
+		int artistId = mainstream.getArtistId(new BufferedReader(new InputStreamReader(System.in)).readLine());
+		Artist artist = mainstream.getArtist(artistId);
 
-		for (int i = 0; i < threads.length; i++) {
-			pool.execute(new LyricScraperThread(httpclient, songs.get(i)));
-		}
+		System.out.println("Submitting Discography Callable");
+		Future<Discography> future = executorService.submit(new DiscographyCallable(httpclient, mainstream, artist));
+		System.out.println("Submitted Discography Callable");
 
-		// All scraping threads have been added, no more will be accepted
-		// Pool has been shutdown, and now we wait for completion
-		pool.shutdown();
+		Discography discography = future.get();
+		executorService.shutdown();
 
 		try {
-			// Wait a maximum of 120 seconds
-			if (pool.awaitTermination(120, TimeUnit.SECONDS)) {
-
-				System.out.println("All threads have ended");
-
-				// Output all song titles, and length of lyrics for POW
-				for (Song song : songs) {
-					System.out.println(song.title + " , " + song.lyrics.length());
-				}
-			}
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			String json = gson.toJson(discography);
+			FileWriter writer = new FileWriter(artist.name + ".json");
+			writer.write(json);
+			writer.close();
 		} catch (Exception ex) {
-
+			ex.printStackTrace();
 		} finally {
-			// Close our http client
 			httpclient.close();
 		}
+
 	}
 }
