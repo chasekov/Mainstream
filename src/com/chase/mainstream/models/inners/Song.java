@@ -11,6 +11,7 @@ public class Song {
 	public int id;
 	public int lyrics_owner_id;
 	public String lyrics_state;
+	public String lyrics;
 
 	public Album album;
 }
