@@ -15,6 +15,7 @@ public class SearchTests {
 	public static void main(String[] args) throws Exception {
 		OfficialClient mainstream = new OfficialClient(
 				"PaBGoZpaVpHDc3_-JtGQ4I3OHuIOPk-4M0OyRzHcrYxK8LHdVEr_4Qf20DPadqtk");
+
 		System.out.println(getPretty(mainstream.getSearchHits("Mac Miller")));
 	}
 

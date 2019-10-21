@@ -13,5 +13,6 @@ public class Song {
 	public String lyrics_state;
 	public String lyrics;
 
+	public Artist primary_artist;
 	public Album album;
 }

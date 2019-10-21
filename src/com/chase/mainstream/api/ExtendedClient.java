@@ -31,7 +31,7 @@ public class ExtendedClient extends OfficialClient {
 		return -1;
 	}
 
-	public List<Song> getArtistSongs(int artistId, SortType sortType)
+	public List<Song> getArtistSongs(int artistId, SortType sortType, boolean primaryOnly)
 			throws ParseException, ClientProtocolException, IOException {
 
 		List<Song> songs = new ArrayList<Song>();
@@ -40,7 +40,16 @@ public class ExtendedClient extends OfficialClient {
 
 		while (moreSongs) {
 			ApiResponse<ArtistSongsResponse> jsonResponse = super.getArtistSongsResponse(artistId, sortType, 50, page);
-			songs.addAll(jsonResponse.response.songs);
+			
+			if(primaryOnly) {
+				for(Song song : jsonResponse.response.songs) {
+					if(song.primary_artist.id == artistId) {
+						songs.add(song);
+					}
+				}
+			}else {
+				songs.addAll(jsonResponse.response.songs);
+			}
 
 			if (jsonResponse.response.next_page == null) {
 				moreSongs = false;
