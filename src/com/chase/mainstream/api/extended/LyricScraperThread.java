@@ -14,24 +14,24 @@ import org.jsoup.nodes.Element;
 
 import com.chase.mainstream.models.inners.Song;
 
-public class LyricScrapperThread extends Thread {
+public class LyricScraperThread extends Thread {
 
 	private CloseableHttpAsyncClient client;
 	private HttpContext context;
 	private HttpGet request;
 	private Song song;
-	
-	public LyricScrapperThread(CloseableHttpAsyncClient client, Song song) {
+
+	public LyricScraperThread(CloseableHttpAsyncClient client, Song song) {
 		this.client = client;
 		context = HttpClientContext.create();
 		this.song = song;
 		this.request = new HttpGet(song.url);
 	}
-	
+
 	public Song getSong() {
 		return song;
 	}
-	
+
 	@Override
 	public void run() {
 		try {
@@ -40,15 +40,15 @@ public class LyricScrapperThread extends Thread {
 			String responseBody = EntityUtils.toString(result.getEntity());
 			Document doc = Jsoup.parse(responseBody);
 			Element element = doc.selectFirst(".lyrics");
-			
+
 			String lyrics = element.wholeText().trim();
 			song.lyrics = lyrics;
-			
-			System.out.println("Completed " + song.full_title);
-			
+
+			// System.out.println("Completed " + song.full_title);
+
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
-	
+
 }
