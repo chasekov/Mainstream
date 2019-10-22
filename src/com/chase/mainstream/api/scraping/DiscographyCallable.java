@@ -40,7 +40,10 @@ public class DiscographyCallable implements Callable<Discography> {
 		LyricScraperThread[] threads = new LyricScraperThread[songs.size()];
 
 		for (int i = 0; i < threads.length; i++) {
+
+			// Provides no value.
 			songs.get(i).primary_artist = null;
+
 			pool.execute(new LyricScraperThread(httpClient, songs.get(i)));
 		}
 

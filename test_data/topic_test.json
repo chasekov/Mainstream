@@ -1,0 +1,20 @@
+{
+  "topics": [
+    {
+      "name": "brands",
+      "keywords": [ "gucci", "versace"]
+    },
+    {
+      "name": "cars",
+      "keywords": ["ford", "bmw", "fiat"]
+    },
+    {
+      "name": "animals",
+      "keywords": ["squirrel", "eagle"]
+    },
+    {
+      "name": "places",
+      "keywords": ["nyc", "california", "connecticut", "canoga park"]    
+    }
+  ]
+}

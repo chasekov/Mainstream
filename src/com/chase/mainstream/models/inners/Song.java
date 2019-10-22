@@ -12,8 +12,9 @@ public class Song {
 
 	public String release_date;
 
-	/* This will never exist unless, discography has been created */
+	/* These will never exist unless, discography has been created */
 	public String lyrics;
+	public String cleaned_lyrics;
 
 	public Artist primary_artist;
 	public Album album;

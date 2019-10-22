@@ -19,11 +19,12 @@ import com.chase.mainstream.models.inners.Artist;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class ExtendedTests {
+public class DiscScrapeTest {
 
 	public static void main(String[] args) throws Exception {
 		ExtendedClient mainstream = new ExtendedClient(
 				"PaBGoZpaVpHDc3_-JtGQ4I3OHuIOPk-4M0OyRzHcrYxK8LHdVEr_4Qf20DPadqtk");
+
 		RequestConfig requestConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build();
 		CloseableHttpAsyncClient httpclient = HttpAsyncClients.custom().setDefaultRequestConfig(requestConfig).build();
 		httpclient.start();
@@ -43,7 +44,7 @@ public class ExtendedTests {
 		try {
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			String json = gson.toJson(discography);
-			FileWriter writer = new FileWriter(artist.name + ".json");
+			FileWriter writer = new FileWriter("discographies/" + artist.name + ".json");
 			writer.write(json);
 			writer.close();
 		} catch (Exception ex) {
@@ -51,6 +52,5 @@ public class ExtendedTests {
 		} finally {
 			httpclient.close();
 		}
-
 	}
 }

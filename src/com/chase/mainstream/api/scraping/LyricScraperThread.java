@@ -13,6 +13,16 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import com.chase.mainstream.models.inners.Song;
+import com.chase.nlp.processing.TextProcessor;
+import com.chase.nlp.processing.stages.BalancedParenthesesCondenser;
+import com.chase.nlp.processing.stages.EmptyLineCondenser;
+import com.chase.nlp.processing.stages.EmptyLineRemover;
+import com.chase.nlp.processing.stages.Lowercase;
+import com.chase.nlp.processing.stages.ParentheseRepeatIndicatorRemover;
+import com.chase.nlp.processing.stages.PunctuationRemover;
+import com.chase.nlp.processing.stages.RepeatedLinesRemover;
+import com.chase.nlp.processing.stages.SectionHeaderRemover;
+import com.chase.nlp.processing.stages.Trimmer;
 
 public class LyricScraperThread extends Thread {
 
@@ -20,12 +30,18 @@ public class LyricScraperThread extends Thread {
 	private HttpContext context;
 	private HttpGet request;
 	private Song song;
+	private TextProcessor lyricProcessor;
 
 	public LyricScraperThread(CloseableHttpAsyncClient client, Song song) {
 		this.client = client;
 		context = HttpClientContext.create();
 		this.song = song;
 		this.request = new HttpGet(song.url);
+
+		lyricProcessor = new TextProcessor().add(new PunctuationRemover()).add(new Lowercase())
+				.add(new SectionHeaderRemover()).add(new ParentheseRepeatIndicatorRemover())
+				.add(new BalancedParenthesesCondenser()).add(new EmptyLineCondenser()).add(new Trimmer())
+				.add(new RepeatedLinesRemover()).add(new EmptyLineRemover());
 	}
 
 	public Song getSong() {
@@ -43,9 +59,11 @@ public class LyricScraperThread extends Thread {
 
 			String lyrics = element.wholeText().trim();
 			song.lyrics = lyrics;
-			System.out.println("Completed " + song.title);
+			song.cleaned_lyrics = lyricProcessor.process(song.lyrics);
 
+			System.out.println("Completed " + song.title);
 		} catch (Exception ex) {
+			System.out.println("Failed " + song.title);
 			ex.printStackTrace();
 		}
 	}
